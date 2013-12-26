@@ -17,4 +17,4 @@ RSpec.configure do |config|
 end
 require 'baidumap'
 $ak = nil
-abort "need to config $ak in spec helper first" if $ak.nil?
+abort "need to config $ak in spec/spec_helper.rb first" if $ak.nil?
