@@ -36,6 +36,19 @@ p response.result
 ```
 
 
+
+
+## 返回码 定义 英文返回描述
+
+* 0 正常 ok
+* 2 请求参数非法 Parameter Invalid
+* 3 权限校验失败 Verify Failure
+* 4 配额校验失败 Quota Failure
+* 5 ak不存在或者非法 AK Failure
+* 2xx 无权限
+* 3xx 配额错误
+
+
 ## Contributing
 
 1. Fork it
