@@ -31,10 +31,6 @@ module Baidumap
     end
 
     private
-    #make http query from a hash
-    def make_query(segments)
-      URI.encode(segments.map{|k,v|"#{k}=#{v}"}.join('&'))
-    end
 
     #send http request
     def request
@@ -45,9 +41,9 @@ module Baidumap
       uri = URI::HTTP.build(
         :host => HOST,
         :path => @action_path,
-        :query => make_query(http_segments)
+        :query => URI.encode_www_form(http_segments)
       ).to_s
-      result = HTTParty.get(uri).parsed_response
+      result = JSON.parse(HTTParty.get(uri).parsed_response)
       Baidumap::Response.new(result,self)
     end
   end
