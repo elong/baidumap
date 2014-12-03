@@ -16,5 +16,5 @@ RSpec.configure do |config|
   config.order = 'random'
 end
 require 'baidumap'
-$ak = nil
+$ak = ''
 abort "need to config $ak in spec/spec_helper.rb first" if $ak.nil?

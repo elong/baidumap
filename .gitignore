@@ -19,3 +19,7 @@ tmp
 lib/.DS_Store
 
 lib/baidumap/.DS_Store
+
+
+*.yaml
+haha.rb

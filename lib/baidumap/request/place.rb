@@ -10,17 +10,17 @@ module Baidumap
         })
       end
 
-      def search_by_bounds(query,lng1,lat1,lng2,lat2)
+      def search_by_bounds(query,lat1,lng1,lat2,lng2)
         search({
           'query'=>query,
-          'bounds'=>"#{lng1},#{lat1},#{lng2},#{lat2}"
+          'bounds'=>"#{lat1},#{lng1},#{lat2},#{lng2}"
         })
       end
 
-      def search_by_radius(query,lng,lat,radius)
+      def search_by_radius(query,lat,lng,radius)
         search({
           'query'=>query,
-          'location'=>"#{lng},#{lat}",
+          'location'=>"#{lat},#{lng}",
           'radius'=>radius
         })
       end
