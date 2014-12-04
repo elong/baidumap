@@ -4,18 +4,16 @@ require 'httparty'
 module Baidumap
   module Request
     HOST = 'api.map.baidu.com'
-    def initialize(ak,pagesize=10,page_num=0,scope=1)
+    def initialize(ak,page_size=10,page_num=0,scope=1)
       service_name = self.class.name.split('::').last.downcase
-      @service_path = "/#{service_name}/#{@version}"
+      @service_path = "/#{service_name}/"
       @ak = ak
-      @segments = {:ak=>@ak,:output=>'json',:pagesize=>pagesize,:page_num => page_num,:scope=>scope}
+      @segments = {:ak=>@ak,:output=>'json',:page_size=>page_size,:page_num => page_num,:scope=>scope}
     end
 
     #actions: search, detail, eventsearch, eventdetail
-    def act(action,params, version='v2')
-      @action_path = File.join(@service_path,action.to_s)
-      # add support for version1
-      @version = version
+    def act(action,params, version='')
+      @action_path = File.join(@service_path,version,action.to_s)
       @params = params
       request
     end

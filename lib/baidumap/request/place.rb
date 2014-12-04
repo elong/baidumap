@@ -39,7 +39,7 @@ module Baidumap
 
       private
       def search(params)
-        act(__method__,params)
+        act(__method__,params,'v2')
       end
     end
   end
