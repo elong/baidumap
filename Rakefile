@@ -1,6 +1,7 @@
 require "json"
 require "yaml"
 require "active_record"
+require "thread"
 require "bundler/gem_tasks"
 require "./lib/baidumap"
 
@@ -42,31 +43,28 @@ namespace :poi do
   #####################
   # Helper  functions #
   #####################
-  def fetch( ak, column, keyword, max_num = 1000, thread_num = 5, queue_length = 400 )
-    queue = []
+  def fetch( ak, column, keyword, max_num = 100, thread_num = 10, queue_length = 40 )
+    # use queue instead of array to ensure thread safe
+    queue_in = Queue.new
+    queue_out = Queue.new
     totally = 0
 
-    # monitor thread
-     monitor = Thread.new do 
+    # reader thread
+    reader = Thread.new do 
       begin
         while true
-          p "click"
-          if queue.length < 0.5*queue_length
-            p "fetching #{column.to_s}"
+          if queue_in.length < 0.5*queue_length
             condition = "#{column.to_s}=''"
             query = BaseAutonaviHotelPoi.where(condition).limit( queue_length )
             query.each do |record|
-              queue << record
+              queue_in.push( record )
             end
             
             totally += query.length
             is_finished = ( totally>max_num && max>0 ) || query.length<queue_length
-            if is_finished
-              raise "Mission completed"
-            end
-
+            raise "Mission completed" if is_finished
           end # if queue is over shorted
-          sleep( 1.second )
+          sleep( thread_num*0.1 )
         end # while
       rescue => e
         p e
@@ -77,18 +75,17 @@ namespace :poi do
     workers = (0..thread_num).map do 
       # start a new thread
       Thread.new do
-        # wait for monitor
-        sleep(1.second)
+        # wait for reader
+        sleep( 1 )
         begin 
-          while work = queue.pop()
-            raise "Works finished" if work == nil
+          # if queue_in is empty, it will raise error and end this thread
+          while work = queue_in.pop()
             begin
-              p "Fetching : " + work[:name].force_encoding('utf-8')
               # define a function here.
               work[ column ] = search( ak, keyword, work[:lat], work[:lng] )
-              work.save 
+              queue_out.push( work )
             rescue => e
-              puts "Errors encoutered when loading : #{work}"
+              puts "Errors encoutered!"
               puts e
             end
           end
@@ -96,13 +93,30 @@ namespace :poi do
         end
       end 
     end # works.map
+
+    # writer thread
+    writer = Thread.new do
+      # wait for workers
+      sleep(2)
+      while true
+        begin
+          record = queue_out.pop
+          record.save
+          # adaptive wrting rate
+          sleep( 1.0/(queue_out.length+1) )
+        rescue => e
+          # todo: add error handling
+        end
+      end
+    end
+
     # hold main thread 
     workers.map(&:join);
-    monitor.join
-
+    reader.join
+    writer.join
   end
 
-  def search( ak, keyword,lat,lng )
+  def search( ak, keyword, lat,lng, max_radius = 3000 )
     """
     given ak, query keyword, lat lng
     execute radius place search
@@ -115,10 +129,9 @@ namespace :poi do
       result = result.result
       num_of_result = result.length
       # check if enough
-      if radius > 3000 || num_of_result > 5
+      if radius > max_radius || num_of_result > 5
         break
       else
-        p "insufficient result from #{keyword} :" + num_of_result.to_s
         radius += 1000
         last_num_of_result = num_of_result
       end
