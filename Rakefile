@@ -61,7 +61,7 @@ namespace :poi do
             end
             
             totally += query.length
-            is_finished = ( totally>max_num && max>0 ) || query.length<queue_length
+            is_finished = ( totally>max_num && max_num>0 ) || query.length<queue_length
             raise "Mission completed" if is_finished
           end # if queue is over shorted
           sleep( thread_num*0.1 )
@@ -100,8 +100,7 @@ namespace :poi do
       sleep(2)
       while true
         begin
-          record = queue_out.pop
-          record.save
+          queue_out.pop.save
           # adaptive wrting rate
           sleep( 1.0/(queue_out.length+1) )
         rescue => e
