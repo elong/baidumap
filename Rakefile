@@ -61,7 +61,7 @@ namespace :poi do
               break if queue_in.length < 0.5*queue_length
             end
           end
-          queue_in.push( record )# if record[:updated_at] < Time.now - 180.day
+          queue_in.push( record ) if record[:updated_at] < Time.now - 180.day
         end
       rescue => e
         p e
