@@ -42,7 +42,7 @@ namespace :poi do
   #####################
   # Helper  functions #
   #####################
-  def fetch( ak, column, keyword, max_num = 1000, thread_num = 10, queue_length = 100 )
+  def fetch( ak, column, keyword, thread_num = 15, queue_length = 10000 )
     # use queue instead of array to ensure thread safe
     queue_in = Queue.new
     queue_out = Queue.new
@@ -51,21 +51,18 @@ namespace :poi do
     # reader thread
     reader = Thread.new do 
       begin
-        while true
-          if queue_in.length < 0.5*queue_length
-            condition = "#{column.to_s}=''"
-            # shading use :slave1 to write
-            query = ::Db::BaseAutonaviHotelPoi.using(:slave1).find_each()
-            query.each do |record|
-              queue_in.push( record )# if record[:updated_at] < Time.now - 180.day
-              totally += 1
+        condition = "#{column.to_s}=''"
+        # shading use :slave1 to write
+        ::Db::BaseAutonaviHotelPoi.using(:slave1).find_each(batch_size:10).each do |record|
+          # if queue_in is full, stop pushing until it is half empty.
+          if queue_in.length > queue_length
+            while true
+              sleep(1)
+              break if queue_in.length < 0.5*queue_length
             end
-            
-            is_finished = ( totally>max_num && max_num>0 )
-            raise "Reader stopped" if is_finished
-          end # if queue is over shorted
-          sleep( thread_num*0.1 )
-        end # while
+          end
+          queue_in.push( record )# if record[:updated_at] < Time.now - 180.day
+        end
       rescue => e
         p e
       end # try catch
