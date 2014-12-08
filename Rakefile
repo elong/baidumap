@@ -10,6 +10,9 @@ require "db"
 
 
 namespace :poi do
+  """
+  usage: $rake poi:fectu_something[your_ak_here(not a string)]
+  """
 
   task :fetch_bus,:ak do |task, args|
     ak = args[:ak]
