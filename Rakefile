@@ -4,13 +4,9 @@ require "active_record"
 require "thread"
 require "bundler/gem_tasks"
 require "./lib/baidumap"
-
-
-config = YAML::load( File.open('db_config.yaml') )
-ActiveRecord::Base.establish_connection( config )
-
-class BaseAutonaviHotelPoi < ActiveRecord::Base
-end
+# shading
+require "octopus"
+require "db"
 
 
 namespace :poi do
@@ -43,7 +39,7 @@ namespace :poi do
   #####################
   # Helper  functions #
   #####################
-  def fetch( ak, column, keyword, max_num = 100, thread_num = 10, queue_length = 40 )
+  def fetch( ak, column, keyword, max_num = 1000, thread_num = 10, queue_length = 100 )
     # use queue instead of array to ensure thread safe
     queue_in = Queue.new
     queue_out = Queue.new
@@ -55,14 +51,15 @@ namespace :poi do
         while true
           if queue_in.length < 0.5*queue_length
             condition = "#{column.to_s}=''"
-            query = BaseAutonaviHotelPoi.where(condition).limit( queue_length )
+            # shading use :slave1 to write
+            query = ::Db::BaseAutonaviHotelPoi.using(:slave1).find_each()
             query.each do |record|
-              queue_in.push( record )
+              queue_in.push( record )# if record[:updated_at] < Time.now - 180.day
+              totally += 1
             end
             
-            totally += query.length
-            is_finished = ( totally>max_num && max_num>0 ) || query.length<queue_length
-            raise "Mission completed" if is_finished
+            is_finished = ( totally>max_num && max_num>0 )
+            raise "Reader stopped" if is_finished
           end # if queue is over shorted
           sleep( thread_num*0.1 )
         end # while
@@ -97,10 +94,11 @@ namespace :poi do
     # writer thread
     writer = Thread.new do
       # wait for workers
-      sleep(2)
+      sleep( thread_num*0.2 + 3 )
       while true
         begin
-          queue_out.pop.save
+          # shading use :master to write
+          queue_out.pop.save.using(:master)
           # adaptive wrting rate
           sleep( 1.0/(queue_out.length+1) )
         rescue => e
