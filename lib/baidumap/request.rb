@@ -1,5 +1,6 @@
 require 'baidumap/request/place'
 require 'baidumap/request/geocoder'
+require 'baidumap/request/geoconv'
 require 'httparty'
 module Baidumap
   module Request
