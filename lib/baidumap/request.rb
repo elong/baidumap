@@ -44,7 +44,12 @@ module Baidumap
         :path => @action_path,
         :query => URI.encode_www_form(http_segments)
       ).to_s
-      result = JSON.parse(HTTParty.get(uri).parsed_response)
+      response = HTTParty.get(uri).parsed_response
+      begin
+        result = JSON.parse( response )
+      rescue
+        result = response
+      end
       Baidumap::Response.new(result,self)
     end
   end

@@ -24,6 +24,7 @@ describe Baidumap::Request::Place do
 
   it "should be able to search by radius" do
     response = subject.search_by_radius('银行',39.915,116.404,2000)
+    p response
     response.class.should == Baidumap::Response
     response.status.should == 0
     result = response.result
