@@ -40,7 +40,6 @@ module Baidumap
           :path => @action_path,
           :query => query
         ).to_s
-        p uri
         result = JSON.parse(HTTParty.get(uri).parsed_response)
         Baidumap::Response.new(result,self)
       end

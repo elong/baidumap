@@ -6,5 +6,6 @@ describe Baidumap::Request::Geoconv do
     lngs = [116.32298703399,116.42198703399]
     lats = [39.983424051248,32.983424051248]
     response = subject.conv(lngs,lats)
+    p response.result
   end
 end
