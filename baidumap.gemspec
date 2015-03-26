@@ -6,8 +6,8 @@ require 'baidumap/version'
 Gem::Specification.new do |spec|
   spec.name          = "baidumap"
   spec.version       = Baidumap::VERSION
-  spec.authors       = ["刘明, ChienliMa"]
-  spec.email         = ["charles.liu@corp.elong.com, maqianlie@gmail.com"]
+  spec.authors       = ["刘明, ChienliMa,TimlenTse"]
+  spec.email         = ["charles.liu@corp.elong.com, maqianlie@gmail.com","tinglenxan@gmail.com"]
   spec.description   = %q{Baidu map services: place, geocoding, direction}
   spec.summary       = %q{Baidu map gem}
   spec.homepage      = "http://github.com/seoaqua/baidumap"
