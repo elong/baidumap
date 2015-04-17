@@ -1,4 +1,4 @@
-source 'https://ruby.tao.org'
+source 'https://ruby.taobao.org'
 
 # Specify your gem's dependencies in baidumap.gemspec
 gemspec
