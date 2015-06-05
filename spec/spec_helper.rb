@@ -5,7 +5,8 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
-  config.treat_symbols_as_metadata_keys_with_true_values = true
+  config.raise_errors_for_deprecations!
+  #config.treat_symbols_as_metadata_keys_with_true_values = true
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
 
@@ -16,5 +17,5 @@ RSpec.configure do |config|
   config.order = 'random'
 end
 require 'baidumap'
-$ak = ''
+$ak = 'ITRp7wngpB1aulNFgoryaRGG'
 abort "need to config $ak in spec/spec_helper.rb first" if $ak.nil?
